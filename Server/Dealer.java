@@ -39,3 +39,34 @@ public class Dealer {
 
     }
 }
+
+class PlayerThreadRead implements Runnable {
+    private InputStream client;
+    private Player player;
+
+    PlayerThreadRead (InputStream client, Player player) {
+        this.client = client;
+        this.player = player;
+    }
+
+    public void run() {
+        Scanner s = new Scanner(this.client);
+        
+        while (s.hasNextLine()) {
+            try {
+                int clientMessage = Integer.parseInt(s.nextLine().trim());
+                if (clientMessage == 1) {
+                    // this.player.printMessages();
+                }
+                if (clientMessage == 2) {
+                    // this.player.printMessages();
+                }
+                // this.server.printMessagesClient(s.nextLine()); 
+            } catch (NumberFormatException e) {
+                this.player.printMessages("Somente números.");
+            }
+            
+        }
+        s.close();
+    }
+}

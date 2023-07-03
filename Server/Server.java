@@ -27,37 +27,27 @@ public class Server {
         ServerSocket server = new ServerSocket(this.PORT);
         while (true) {
             Socket player = server.accept();
-            System.out.println("Jogador 1 entrou");
-
-            PrintStream playerWrite = new PrintStream(player.getOutputStream());
-            this.writePlayers = playerWrite;
             
-            PlayerThreadRead playerThreadRead = new PlayerThreadRead(player.getInputStream(), this);
-            new Thread(playerThreadRead).start();
+            PrintStream playerWrite = new PrintStream(player.getOutputStream());
+            InputStream playerOutput = player.getInputStream();
+            Player p = new Player(playerWrite, playerOutput, id++);
+            Dealer dealer =  new Dealer(p);
+            // this.players.add(p);
+            // this.broadcastMessages("Player: " + p.getId() + " entrou.");
+            // this.sendMessage("1- Pedir carta\n2- Parar", p);
         }
         // server.close();
     }
 
-    public void printMessageClient(String message) {
-        this.writePlayers.println("Player1: " + message);
-    }
-}
-
-class PlayerThreadRead implements Runnable {
-    private InputStream client;
-    private Server server;
-
-    PlayerThreadRead (InputStream client, Server server) {
-        this.client = client;
-        this.server = server;
-    }
-
-    public void run() {
-        Scanner s = new Scanner(this.client);
-
-        while (s.hasNextLine()) {
-            this.server.printMessageClient(s.nextLine());
+    /*public void broadcastMessages(String message) {
+        for (Player p: this.players) {
+            p.printMessages(message);
         }
-        s.close();
+        // this.writePlayers.println("Player1: " + message);
     }
+
+    public void sendMessage(String message, Player player) {
+        player.printMessages(message);
+    }*/
 }
+
