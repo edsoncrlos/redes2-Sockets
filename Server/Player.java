@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Player implements Runnable {
-    private PrintStream writePlayer;
-    private InputStream outputPlayer;
+    private PrintStream playerSend;
+    private InputStream PlaterReceive;
     private int id;
     private List<String> cards;
     private boolean stand = false;
     private Dealer dealer;
 
-    Player (PrintStream writePlayer, InputStream outputPlayer, int id) {
-        this.writePlayer = writePlayer;
-        this.outputPlayer = outputPlayer;
+    Player (PrintStream playerSend, InputStream PlaterReceive, int id) {
+        this.playerSend = playerSend;
+        this.PlaterReceive = PlaterReceive;
         this.id = id;
         this.cards = new ArrayList<String>();
     }
@@ -44,12 +44,12 @@ public class Player implements Runnable {
         return stand;
     }
 
-    public InputStream getOutputPlayer() {
-        return this.outputPlayer;
+    public InputStream PlaterReceive() {
+        return this.PlaterReceive;
     }
 
     public void printMessages(String message) {
-        this.writePlayer.println(message);
+        this.playerSend.println(message);
     }
 
     public void setDealer(Dealer dealer) {
@@ -65,7 +65,7 @@ public class Player implements Runnable {
     }
 
     public void run() {
-        Scanner s = new Scanner(this.outputPlayer);
+        Scanner s = new Scanner(this.PlaterReceive);
         
         while (s.hasNextLine()) {
             try {

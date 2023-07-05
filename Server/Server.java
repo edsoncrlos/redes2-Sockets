@@ -28,9 +28,9 @@ public class Server {
             try {
                 Socket player = server.accept();
                 
-                PrintStream playerWrite = new PrintStream(player.getOutputStream());
-                InputStream playerOutput = player.getInputStream();
-                Player p = new Player(playerWrite, playerOutput, id++);
+                PrintStream playerSend = new PrintStream(player.getOutputStream());
+                InputStream playerReceive = player.getInputStream();
+                Player p = new Player(playerSend, playerReceive, id++);
 
                 new Dealer(p);
             } catch (Exception e) {
