@@ -5,12 +5,10 @@ import java.util.EmptyStackException;
 import java.util.List;
 
 public class Dealer {
-    static int PORT = 1200;
     private String[] typesCards = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
     private Stack<String> deck;
     private Player player;
     private List<String> cards;
-    private Thread thread;
 
     Dealer (Player player) {
         this.deck = new Stack<String>();
@@ -33,8 +31,8 @@ public class Dealer {
 
     public void addPlayer(Player player) {
         player.setDealer(this);
-        thread = new Thread(player);
-        thread.start();
+        new Thread(player).start();
+        // thread.start
     }
 
     private void startDealer() {
@@ -76,7 +74,6 @@ public class Dealer {
 
         return message;
     }
-
     
     public String hit() {
         try {
@@ -94,7 +91,7 @@ public class Dealer {
         this.winnerMessage();
 
         try {
-            this.thread.sleep(1000);
+            Thread.sleep(1000);
         } catch (Exception e) {
             // TODO: handle exception
         }
