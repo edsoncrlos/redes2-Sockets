@@ -103,7 +103,7 @@ public class Dealer {
     }
 
     public int getScore(List<String> cards) {
-        int numberAs = 0;
+        int numberAce = 0;
         int score = 0;
 
         for (int i = 0; i < cards.size(); i++) {
@@ -111,17 +111,18 @@ public class Dealer {
             if (card == "J" || card == "Q" || card == "K") {
                 score += 10;
             } else if (card == "A") {
-                numberAs += 1;
+                numberAce += 1;
             } else {
                 score += Integer.parseInt(card);
             }
         }
-        if (numberAs > 0) {
-            if (score + 11 + (numberAs - 1) <= 21) {
+        if (numberAce > 0) {
+            // check if value of ace can be 11 
+            if (score + 11 + (numberAce - 1) <= 21) {
                 score += 11;
-                score += (numberAs-1);
+                score += (numberAce-1);
             } else {
-                score += numberAs;
+                score += numberAce;
             }
         }
 
