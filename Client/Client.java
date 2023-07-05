@@ -1,14 +1,15 @@
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Scanner;
 
 public class Client {
     private int port;
-    private String host = "127.0.0.1";
+    private String host = "127.0.0.0";
     
     public static void main(String[] args) {
-        new Client(null, 1200);
+        new Client("127.0.0.0", 1200);
     }
     
     public Client (String host, int port) {
@@ -29,13 +30,20 @@ public class Client {
             Scanner s = new Scanner(System.in);
             while (s.hasNextLine()) {
                 clientWrite.println(s.nextLine());
+
+                if (client.isClosed()) {
+                    System.out.println("Conexão perdida com o servidor.");
+                    break;
+                }
             }
 
             s.close();
             client.close();
-        } catch (Exception e) {
-            // TODO: handle exception
-        }  
+        } catch (ConnectException e) {
+            System.out.println("Não possível conectar conectar com o servidor");
+        }  catch (Exception e) {
+            System.out.println(e);
+        }
     }
 }
 
