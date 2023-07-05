@@ -12,12 +12,25 @@ public class Player implements Runnable {
     private List<String> cards;
     private boolean stand = false;
     private Dealer dealer;
+    private int dealerScore = 0;
+    private int playerScore = 0;
 
     Player (PrintStream playerSend, InputStream PlaterReceive, int id) {
         this.playerSend = playerSend;
         this.PlaterReceive = PlaterReceive;
         this.id = id;
         this.cards = new ArrayList<String>();
+    }
+
+    public void newGame() {
+        if (!this.cards.isEmpty()) {
+            this.cards.clear();
+        }
+    }
+
+    public void clearScreen() {
+        this.playerSend.print("\033[H\033[2J");
+        this.playerSend.flush();
     }
 
     public void hit(String card) {
@@ -33,6 +46,8 @@ public class Player implements Runnable {
         for (int index = 0; index < this.cards.size(); index++) {
             message += " " + this.cards.get(index);
         }
+        message += ": " + this.dealer.getScore(this.cards);
+
         return message;
     }
 
@@ -76,6 +91,15 @@ public class Player implements Runnable {
                 }
                 if (clientMessage == 2) {
                     this.dealer.stand();
+                    String winner = this.dealer.winner();
+                    if (winner == "Player") {
+                        playerScore++;
+                    } else if (winner == "Dealer") {
+                        dealerScore++;
+                    }
+                }
+                if (clientMessage == 3) {
+                    this.printMessages("\nPlacar\nDealer: " + this.dealerScore + "\nYou: " + this.playerScore);
                 }
 
             } catch (NumberFormatException e) {

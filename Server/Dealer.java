@@ -10,43 +10,53 @@ public class Dealer {
     private Stack<String> deck;
     private Player player;
     private List<String> cards;
-    // private boolean stand = false;
+    private Thread thread;
 
     Dealer (Player player) {
         this.deck = new Stack<String>();
         this.cards = new ArrayList<String>();
-        this.makeDeck();
-
+        
         this.player = player;
         this.addPlayer(player);
+
+        this.newGame();
+    }
+    
+    public void newGame() {
+        this.makeDeck();
+        if (!this.cards.isEmpty()) {
+            this.cards.clear();
+        }
         this.startDealer();
         this.startPlayer();
     }
 
     public void addPlayer(Player player) {
         player.setDealer(this);
-        new Thread(player).start();;
+        thread = new Thread(player);
+        thread.start();
     }
 
     private void startDealer() {
-        System.out.println(this.deck);
         this.cards.add(this.hit());
         this.cards.add(this.hit());
     }
     
     private void startPlayer() {
         this.player.printMessages("Dealer: " + this.cards.get(0) + " *");
-        
+    
+        this.player.newGame();
         this.player.hit(this.hit());
         this.player.hit(this.hit());
         this.player.showCurrentCards();
         
-        this.player.printMessages("1- Hit\n2- Stand\n");
+        this.player.printMessages("1- Hit\n2- Stand\n3 - Placar");
     }
 
 
     private void makeDeck () {
-        // this.deck.clear();
+        if (!this.deck.empty())
+            this.deck.clear();
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < this.typesCards.length; j++) {
@@ -78,9 +88,18 @@ public class Dealer {
     
     public void stand() {
         this.player.stand();
-        // TODO: if all players stand
+        this.player.clearScreen();
+
         this.dealerFinish();
-        this.winner();
+        this.winnerMessage();
+
+        try {
+            this.thread.sleep(1000);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        this.player.printMessages("\n");
+        this.newGame();
     }
 
     public int getScore(List<String> cards) {
@@ -121,19 +140,36 @@ public class Dealer {
         }
     }
 
-    private void winner() {
+    private void winnerMessage() {
         int dealer = this.getScore(this.cards);
         int player = this.getScore(this.player.getCards());
-        String message = "";
+        String winner = this.winner();
+        String message;
+
+        if (winner == "Dealer") {
+            message = "A casa ganhou $_$";
+        } else if (winner == "Player") {
+            message = "Você ganhou :-7";
+        } else {
+            message = "Empate";
+        }
+
+        this.player.printMessages("Dealer: " + dealer + "\nYou: " + player + "\n" + message);
+    }
+
+    public String winner() {
+        int dealer = this.getScore(this.cards);
+        int player = this.getScore(this.player.getCards());
+        String message;
 
         if ((dealer > 21 && player > 21) || (player == dealer)) {
             message = "Empate";
         } else if ((dealer > 21 && player <= 21) || (dealer <= 21 && player <= 21 && player > dealer)) {
-            message = "Você ganhou :-7";
+            message = "Player";
         } else {
-            message = "A casa ganhou $_$";
+            message = "Dealer";
         }
 
-        this.player.printMessages("Dealer: " + dealer + "\nYou: " + player + "\n" + message);
+        return message;
     }
 }
