@@ -23,8 +23,8 @@ public class Dealer {
     }
 
     public void addPlayer(Player player) {
-        PlayerThreadRead playerThreadRead = new PlayerThreadRead(player.getOutputPlayer(), player, this);
-        new Thread(playerThreadRead).start();
+        player.setDealer(this);
+        new Thread(player).start();;
     }
 
     private void startDealer() {

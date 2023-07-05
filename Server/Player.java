@@ -2,13 +2,15 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
-public class Player {
+public class Player implements Runnable {
     private PrintStream writePlayer;
     private InputStream outputPlayer;
     private int id;
     private List<String> cards;
     private boolean stand = false;
+    private Dealer dealer;
 
     Player (PrintStream writePlayer, InputStream outputPlayer, int id) {
         this.writePlayer = writePlayer;
@@ -49,11 +51,36 @@ public class Player {
         this.writePlayer.println(message);
     }
 
+    public void setDealer(Dealer dealer) {
+        this.dealer = dealer;
+    }
+
     public int getId() {
         return this.id;
     }
 
     public List<String> getCards() {
         return this.cards;
+    }
+
+    public void run() {
+        Scanner s = new Scanner(this.outputPlayer);
+        
+        while (s.hasNextLine()) {
+            try {
+                int clientMessage = Integer.parseInt(s.nextLine().trim());
+                if (clientMessage == 1) {
+                    this.hit(this.dealer.hit());
+                    this.showCurrentCards();
+                }
+                if (clientMessage == 2) {
+                    this.dealer.stand();
+                }
+
+            } catch (NumberFormatException e) {
+                this.printMessages("Somente números.");
+            }
+        }
+        s.close();
     }
 }
