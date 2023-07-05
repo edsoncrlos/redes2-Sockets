@@ -1,6 +1,7 @@
 import java.util.Stack;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EmptyStackException;
 import java.util.List;
 
 public class Dealer {
@@ -68,7 +69,11 @@ public class Dealer {
 
     
     public String hit() {
-        return this.deck.pop();
+        try {
+            return this.deck.pop();
+        } catch (EmptyStackException e) {
+            throw e;
+        }
     }
     
     public void stand() {
@@ -106,9 +111,13 @@ public class Dealer {
     
     private void dealerFinish () {
         this.player.printMessages(this.showDealerCards());
-        while (getScore(this.cards) < 17) {
-            this.cards.add(this.hit());
-            this.player.printMessages(this.showDealerCards());
+        try {
+            while (getScore(this.cards) < 17) {
+                this.cards.add(this.hit());
+                this.player.printMessages(this.showDealerCards());
+            }
+        } catch (EmptyStackException e) {
+            this.player.printMessages("Acabaram as cartas");
         }
     }
 

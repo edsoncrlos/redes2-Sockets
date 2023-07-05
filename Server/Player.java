@@ -1,6 +1,7 @@
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -79,7 +80,9 @@ public class Player implements Runnable {
 
             } catch (NumberFormatException e) {
                 this.printMessages("Somente números.");
-            }
+            } catch (EmptyStackException e) {
+                this.printMessages("As cartas acabaram!!");
+            } 
         }
         s.close();
     }
