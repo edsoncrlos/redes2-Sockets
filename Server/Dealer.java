@@ -32,7 +32,6 @@ public class Dealer {
     public void addPlayer(Player player) {
         player.setDealer(this);
         new Thread(player).start();
-        // thread.start
     }
 
     private void startDealer() {
