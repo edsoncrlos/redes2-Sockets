@@ -81,7 +81,7 @@ public class Player implements Runnable {
 
     public void run() {
         Scanner s = new Scanner(this.PlaterReceive);
-        
+
         while (s.hasNextLine()) {
             try {
                 int clientMessage = Integer.parseInt(s.nextLine().trim());
@@ -109,5 +109,6 @@ public class Player implements Runnable {
             } 
         }
         s.close();
+        this.dealer = null;
     }
 }
