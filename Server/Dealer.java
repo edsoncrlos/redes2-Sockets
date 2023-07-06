@@ -47,7 +47,7 @@ public class Dealer {
         this.player.hit(this.hit());
         this.player.showCurrentCards();
         
-        this.player.printMessages("1- Hit\n2- Stand\n3 - Placar");
+        this.player.printMessages("1- Hit\n2- Stand\n3 - Placar\n4 - Sair");
     }
 
 

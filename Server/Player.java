@@ -1,5 +1,6 @@
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.EmptyStackException;
 import java.util.List;
@@ -14,10 +15,16 @@ public class Player implements Runnable {
     private Dealer dealer;
     private int dealerScore = 0;
     private int playerScore = 0;
+    private Socket playerSocket;
 
-    Player (PrintStream playerSend, InputStream PlaterReceive, int id) {
-        this.playerSend = playerSend;
-        this.PlaterReceive = PlaterReceive;
+    Player (Socket playerSocket, int id) {
+        this.playerSocket = playerSocket;
+        try {
+            this.playerSend = new PrintStream(playerSocket.getOutputStream());
+            this.PlaterReceive = playerSocket.getInputStream();;
+        } catch (Exception e) {
+            System.out.println(e);
+        }
         this.id = id;
         this.cards = new ArrayList<String>();
     }
@@ -101,12 +108,17 @@ public class Player implements Runnable {
                 if (clientMessage == 3) {
                     this.printMessages("\nPlacar\nDealer: " + this.dealerScore + "\nYou: " + this.playerScore);
                 }
+                if (clientMessage == 4) {
+                    this.playerSocket.close();
+                }
 
             } catch (NumberFormatException e) {
                 this.printMessages("Somente números.");
             } catch (EmptyStackException e) {
                 this.printMessages("As cartas acabaram!!");
-            } 
+            } catch (Exception e) {
+                System.out.println(e);
+            }
         }
         s.close();
         this.dealer = null;

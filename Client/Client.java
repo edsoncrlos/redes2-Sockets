@@ -1,6 +1,7 @@
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -9,7 +10,7 @@ public class Client {
     private String host = "127.0.0.0";
     
     public static void main(String[] args) {
-        new Client("127.0.0.0", 1200);
+        new Client("127.0.0.1", 1200);
     }
     
     public Client (String host, int port) {
@@ -29,10 +30,16 @@ public class Client {
             
             Scanner s = new Scanner(System.in);
             while (s.hasNextLine()) {
-                clientWrite.println(s.nextLine());
+                String message = s.nextLine();
+                clientWrite.println(message);
 
                 if (client.isClosed()) {
                     System.out.println("Conexão perdida com o servidor.");
+                    break;
+                }
+                
+                if (message.trim().equals("4")) {
+                    System.out.println("Tchau!!");
                     break;
                 }
             }
@@ -41,7 +48,9 @@ public class Client {
             client.close();
         } catch (ConnectException e) {
             System.out.println("Não possível conectar conectar com o servidor");
-        }  catch (Exception e) {
+        } catch (NoRouteToHostException e) {
+            System.out.println("O servidor não está disponível ou seu endereço está incorreto.");
+        } catch (Exception e) {
             System.out.println(e);
         }
     }
