@@ -13,8 +13,6 @@ public class Player implements Runnable {
     private List<String> cards;
     private boolean stand = false;
     private Dealer dealer;
-    private int dealerScore = 0;
-    private int playerScore = 0;
     private Socket playerSocket;
 
     Player (Socket playerSocket, int id) {
@@ -33,6 +31,7 @@ public class Player implements Runnable {
         if (!this.cards.isEmpty()) {
             this.cards.clear();
         }
+        this.stand = false;
     }
 
     public void clearScreen() {
@@ -45,11 +44,11 @@ public class Player implements Runnable {
     }
 
     public void showCurrentCards() {
-        this.printMessages(this.currentCards());
+        this.printMessages(this.currentCards("You:"));
     }
     
-    private String currentCards() {
-        String message = "You:";
+    public String currentCards(String name) {
+        String message = name;
         for (int index = 0; index < this.cards.size(); index++) {
             message += " " + this.cards.get(index);
         }
@@ -92,35 +91,33 @@ public class Player implements Runnable {
         while (s.hasNextLine()) {
             try {
                 int clientMessage = Integer.parseInt(s.nextLine().trim());
-                if (clientMessage == 1) {
-                    this.hit(this.dealer.hit());
-                    this.showCurrentCards();
-                }
-                if (clientMessage == 2) {
-                    this.dealer.stand();
-                    String winner = this.dealer.winner();
-                    if (winner == "Player") {
-                        playerScore++;
-                    } else if (winner == "Dealer") {
-                        dealerScore++;
-                    }
-                }
-                if (clientMessage == 3) {
-                    this.printMessages("\nPlacar\nDealer: " + this.dealerScore + "\nYou: " + this.playerScore);
-                }
-                if (clientMessage == 4) {
-                    this.playerSocket.close();
+
+                if (clientMessage == 0) {
+                    this.dealer.newGame();
                 }
 
+                if (!this.dealer.isAvailable()) {
+                    if (clientMessage == 1) {
+                        this.hit(this.dealer.hit());
+                        this.showCurrentCards();
+                    }
+                    if (clientMessage == 2) {
+                        this.dealer.stand(this);
+                        this.stand();
+                    }
+                    if (clientMessage == 3) {
+                        this.playerSocket.close();
+                        break;
+                    }
+                }
             } catch (NumberFormatException e) {
                 this.printMessages("Somente números.");
             } catch (EmptyStackException e) {
-                this.printMessages("As cartas acabaram!!");
+                this.printMessages("Sem cartas!!");
             } catch (Exception e) {
                 System.out.println(e);
             }
         }
         s.close();
-        this.dealer = null;
     }
 }

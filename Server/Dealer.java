@@ -7,29 +7,33 @@ import java.util.List;
 public class Dealer {
     private String[] typesCards = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
     private Stack<String> deck;
-    private Player player;
+    private boolean isAvailable;
+    private List<Player> players;
     private List<String> cards;
 
-    Dealer (Player player) {
+    Dealer () {
         this.deck = new Stack<String>();
         this.cards = new ArrayList<String>();
         
-        this.player = player;
-        this.addPlayer(player);
-
-        this.newGame();
+        this.players = new ArrayList<Player>();
+        this.isAvailable = true;
     }
     
     public void newGame() {
+        this.isAvailable = false;
         this.makeDeck();
         if (!this.cards.isEmpty()) {
             this.cards.clear();
         }
         this.startDealer();
-        this.startPlayer();
+        this.startPlayers();
     }
 
     public void addPlayer(Player player) {
+        player.printMessages("Esperando por jogadores...\nPressione 0 para iniciar a partida.");
+        this.players.add(player);
+        this.printBroadcastMessages("player "+player.getId()+" entrou.");
+
         player.setDealer(this);
         new Thread(player).start();
     }
@@ -39,17 +43,20 @@ public class Dealer {
         this.cards.add(this.hit());
     }
     
-    private void startPlayer() {
-        this.player.printMessages("Dealer: " + this.cards.get(0) + " *");
-    
-        this.player.newGame();
-        this.player.hit(this.hit());
-        this.player.hit(this.hit());
-        this.player.showCurrentCards();
-        
-        this.player.printMessages("1- Hit\n2- Stand\n3 - Placar\n4 - Sair");
+    private void startPlayers() {
+        for (Player player: this.players) {
+            player.printMessages("\nDealer: " + this.cards.get(0) + " *");
+            this.startPlayer(player);
+            player.printMessages("\n1- Hit\n2- Stand\n3 - Sair");
+        }
     }
 
+    private void startPlayer(Player player) {
+        player.newGame();
+        player.hit(this.hit());
+        player.hit(this.hit());
+        player.showCurrentCards();
+    }
 
     private void makeDeck () {
         if (!this.deck.empty())
@@ -70,6 +77,7 @@ public class Dealer {
         for (int i = 0; i < this.cards.size(); i++) {
             message += " " + this.cards.get(i);
         }
+        message += ": " + this.getScore(this.cards);
 
         return message;
     }
@@ -81,21 +89,34 @@ public class Dealer {
             throw e;
         }
     }
-    
-    public void stand() {
-        this.player.stand();
-        this.player.clearScreen();
 
-        this.dealerFinish();
-        this.winnerMessage();
-
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            // TODO: handle exception
+    private boolean allStand() {
+        for (Player player: this.players) {
+            if (!player.getStand()) {
+                return false;
+            }
         }
-        this.player.printMessages("\n");
-        this.newGame();
+        return true;
+    }
+    
+    public void stand(Player player) {
+        player.stand();
+        
+        if (this.allStand()) {
+            this.dealerFinish();
+            this.winnerMessage();
+            
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                // TODO: handle exception
+            }
+            this.isAvailable = true;
+            this.printBroadcastMessages("\nEsperando por jogadores...\nPressione 0 para iniciar a partida.");
+        } else {
+            player.clearScreen();
+            player.printMessages("Esperando outros jogadores...");
+        }
     }
 
     public int getScore(List<String> cards) {
@@ -126,47 +147,89 @@ public class Dealer {
     }
     
     private void dealerFinish () {
-        this.player.printMessages(this.showDealerCards());
+        for (Player player: this.players) {
+            player.clearScreen();
+        }
+
         try {
             while (getScore(this.cards) < 17) {
                 this.cards.add(this.hit());
-                this.player.printMessages(this.showDealerCards());
             }
+            this.printBroadcastMessages(this.showDealerCards());
         } catch (EmptyStackException e) {
-            this.player.printMessages("Acabaram as cartas");
+            this.printBroadcastMessages("Acabaram as cartas");
         }
     }
 
     private void winnerMessage() {
-        int dealer = this.getScore(this.cards);
-        int player = this.getScore(this.player.getCards());
-        String winner = this.winner();
-        String message;
-
-        if (winner == "Dealer") {
-            message = "A casa ganhou $_$";
-        } else if (winner == "Player") {
-            message = "Você ganhou :-7";
-        } else {
-            message = "Empate";
-        }
-
-        this.player.printMessages("Dealer: " + dealer + "\nYou: " + player + "\n" + message);
+        this.winner();
     }
 
-    public String winner() {
+    public void winner() {
         int dealer = this.getScore(this.cards);
-        int player = this.getScore(this.player.getCards());
-        String message;
+        int[] playersScore = new int[this.players.size()];
+        int higher = 0;
+        int numberHigher = 1;
 
-        if ((dealer > 21 && player > 21) || (player == dealer)) {
-            message = "Empate";
-        } else if ((dealer > 21 && player <= 21) || (dealer <= 21 && player <= 21 && player > dealer)) {
-            message = "Player";
-        } else {
-            message = "Dealer";
+        for (int i = 0; i < this.players.size(); i++) {
+            playersScore[i] = this.getScore(this.players.get(i).getCards());
+            if (playersScore[i] > higher && playersScore[i] <= 21) {
+                higher = playersScore[i];
+                numberHigher = 1;
+            } else if (playersScore[i] == higher) {
+                numberHigher++;
+            }
         }
 
-        return message;
+        // Dealer
+        if (dealer > higher && dealer <= 21) {
+            higher = dealer;
+            if (numberHigher >= 1) {
+                numberHigher = 0;
+            }
+        } else if (dealer == higher) {
+            numberHigher++;
+        } 
+
+        for (Player player: this.players) {
+            player.showCurrentCards();
+        }
+        for (Player player: this.players) {
+            this.printBroadcastMessages(player.currentCards("Player "+ player.getId()+ ":"), player.getId());
+        }
+        
+        for (int i = 0; i < this.players.size(); i++) {
+            Player player = this.players.get(i);
+
+            if (numberHigher == 1 && higher == playersScore[i]) {
+                player.printMessages("Você ganhou");
+            } else if (numberHigher > 1 && higher == playersScore[i]) {
+                player.printMessages("Você Empatou");
+            } else {
+                player.printMessages("Você perdeu");
+            } 
+            
+            if (numberHigher == 0) {
+                player.printMessages("A casa ganhou  $_$");
+            }
+        }
+    }
+
+    public boolean isAvailable() {
+        return this.isAvailable;
+    }
+
+    private void printBroadcastMessages(String message) {
+        for (Player player: this.players) {
+            player.printMessages(message);
+        }
+    }
+
+    private void printBroadcastMessages(String message, int notPrintForPlayer) {
+        for (Player player: this.players) {
+            if (player.getId() != notPrintForPlayer) {
+                player.printMessages(message);
+            }
+        }
     }
 }

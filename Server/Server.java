@@ -22,12 +22,19 @@ public class Server {
     
     private void init() throws IOException {
         ServerSocket server = new ServerSocket(this.PORT);
+        Dealer d = new Dealer();
         while (true) {
             try {
                 Socket player = server.accept();
                 
                 Player p = new Player(player, id++);
-                new Dealer(p);
+                
+                if (d.isAvailable()) {
+                    d.addPlayer(p);
+                } else {
+                    d = new Dealer();
+                }
+                
             } catch (Exception e) {
                 System.out.println(e);
                 server.close();
