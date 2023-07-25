@@ -102,8 +102,8 @@ public class Player implements Runnable {
                         this.showCurrentCards();
                     }
                     if (clientMessage == 2) {
-                        this.dealer.stand(this);
                         this.stand();
+                        this.dealer.stand(this);
                     }
                     if (clientMessage == 3) {
                         this.playerSocket.close();
@@ -119,5 +119,6 @@ public class Player implements Runnable {
             }
         }
         s.close();
+        this.dealer.removePlayer(this);
     }
 }

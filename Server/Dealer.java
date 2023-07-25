@@ -58,6 +58,10 @@ public class Dealer {
         player.showCurrentCards();
     }
 
+    public int numberPlayers() {
+        return this.players.size();
+    }
+
     private void makeDeck () {
         if (!this.deck.empty())
             this.deck.clear();
@@ -81,6 +85,17 @@ public class Dealer {
 
         return message;
     }
+
+    public void removePlayer(Player player) {
+        this.printBroadcastMessages("Player "+ player.getId() + " saiu.", player.getId());
+        this.players.remove(player);
+
+        if (!this.isAvailable) {
+            if (this.allStand()) {
+                this.finishMatch();
+            }
+        }
+    }
     
     public String hit() {
         try {
@@ -98,25 +113,27 @@ public class Dealer {
         }
         return true;
     }
-    
-    public void stand(Player player) {
-        player.stand();
-        
+
+    public void stand(Player player) {      
         if (this.allStand()) {
-            this.dealerFinish();
-            this.winnerMessage();
-            
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                // TODO: handle exception
-            }
-            this.isAvailable = true;
-            this.printBroadcastMessages("\nEsperando por jogadores...\nPressione 0 para iniciar a partida.");
+            this.finishMatch();
         } else {
             player.clearScreen();
             player.printMessages("Esperando outros jogadores...");
         }
+    }
+
+    public void finishMatch() {
+        this.dealerFinish();
+        this.winnerMessage();
+        
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
+        this.isAvailable = true;
+        this.printBroadcastMessages("\nEsperando por jogadores...\nPressione 0 para iniciar a partida.");
     }
 
     public int getScore(List<String> cards) {
