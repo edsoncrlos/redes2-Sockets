@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class Player implements Runnable {
     private PrintStream playerSend;
-    private InputStream PlaterReceive;
+    private InputStream PlayerReceive;
     private int id;
     private List<String> cards;
     private boolean stand = false;
@@ -19,7 +19,7 @@ public class Player implements Runnable {
         this.playerSocket = playerSocket;
         try {
             this.playerSend = new PrintStream(playerSocket.getOutputStream());
-            this.PlaterReceive = playerSocket.getInputStream();;
+            this.PlayerReceive = playerSocket.getInputStream();;
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -65,8 +65,8 @@ public class Player implements Runnable {
         return stand;
     }
 
-    public InputStream PlaterReceive() {
-        return this.PlaterReceive;
+    public InputStream PlayerReceive() {
+        return this.PlayerReceive;
     }
 
     public void printMessages(String message) {
@@ -86,7 +86,7 @@ public class Player implements Runnable {
     }
 
     public void run() {
-        Scanner s = new Scanner(this.PlaterReceive);
+        Scanner s = new Scanner(this.PlayerReceive);
 
         while (s.hasNextLine()) {
             try {
